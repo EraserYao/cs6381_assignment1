@@ -152,15 +152,15 @@ class SubscriberAppln():
                 self.logger.debug ("SubscriberAppln::invoke_operation - date receive completed")
     
                 # we are done. And continue to receive publishers
-                self.state = self.State.WAITING
+                self.state = self.State.LOOKUP
     
                 # go to event loop waiting the reply
                 return None
 
-            elif (self.state == self.State.WAITING):
-                #we received some publishers to show up
-                self.state = self.State.DATARECEIVE
-                return 0
+            # elif (self.state == self.State.WAITING):
+            #     #we received some publishers to show up
+            #     self.state = self.State.LOOKUP
+            #     return 0
 
             else:
                 raise ValueError ("Undefined state of the appln object")

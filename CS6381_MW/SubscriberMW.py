@@ -129,7 +129,7 @@ class SubscriberMW():
         except Exception as e:
             raise e
     
-    def register (self, name):
+    def register (self, name, topiclist):
         ''' register the appln with the discovery service '''
 
         try:
@@ -146,6 +146,7 @@ class SubscriberMW():
             register_req = discovery_pb2.RegisterReq ()  # allocate 
             register_req.role = discovery_pb2.ROLE_SUBSCRIBER 
             register_req.info.CopyFrom (reg_info)  # copy contents of inner structure
+            register_req.topiclist[:] = topiclist   # this is how repeated entries are added (or use append() or extend ()
             self.logger.debug ("SubscriberMW::register - done populating nested RegisterReq")
 
             # Finally, build the outer layer DiscoveryReq Message
@@ -171,7 +172,7 @@ class SubscriberMW():
             raise e
         
 
-    def lookup_publisher(self,name, topiclist):
+    def lookup_publisher(self,name):
         #send topic list to discovery
         #look up like register
         try:
@@ -179,7 +180,6 @@ class SubscriberMW():
             self.logger.debug ("SubscriberMW::lookup_req - populate the LookupPubByTopicReq")
             lookup_req = discovery_pb2.LookupPubByTopicReq () # allocate
             lookup_req.id = name  # our id
-            lookup_req.topiclist[:] = topiclist   # this is how repeated entries are added (or use append() or extend ()
             self.logger.debug ("SubscriberMW::lookup - done populating nested LookupPubByTopicReq")
 
             # Finally, build the outer layer DiscoveryReq Message
