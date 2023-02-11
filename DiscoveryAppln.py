@@ -45,7 +45,11 @@ class DiscoveryAppln():
     class State (Enum):
         INITIALIZE = 0,
         CONFIGURE = 1,
-        EVENT=3
+        PUB_REGISTER=2,
+        SUB_REGISTER=3,
+        PUB_ISREADY=4,
+        SUB_LOOKUP=5
+
 
     def __init__(self,logger):
         self.state = self.State.INITIALIZE # state that are we in
@@ -74,5 +78,88 @@ class DiscoveryAppln():
 
             self.logger.info ("DiscoveryAppln::configure - configuration complete")
       
+        except Exception as e:
+            raise e
+        
+
+    def driver (self):
+        ''' Driver program '''
+
+        try:
+            self.logger.info ("DiscoveryAppln::driver")
+
+            self.dump ()
+
+            self.logger.debug ("DiscoveryAppln::driver - upcall handle")
+            self.mw_obj.set_upcall_handle (self)
+
+            self.state = self.State.CHECKING
+
+            self.mw_obj.event_loop (timeout=0)  # start the event loop
+
+            self.logger.info ("DiscoveryAppln::driver completed")
+
+        except Exception as e:
+            raise e
+        
+    def invoke_operation (self):
+        ''' Invoke operating depending on state  '''
+
+        try:
+            self.logger.info ("DiscoveryAppln::invoke_operation")
+
+            if (self.state == self.State.CHECKING):
+                # send a register msg to discovery service
+                self.logger.debug ("DiscoveryAppln::invoke_operation - waiting for pub and sub ")
+                self.mw_obj.register (self.name)
+
+                return None
+
+            elif (self.state == self.State.EVENTLOOP):
+
+                self.logger.debug ("DiscoveryAppln::invoke_operation - look up from discovery about publishers") 
+                self.mw_obj.lookup_publisher(self.name, self.topiclist) #send look up request
+
+                return None
+            
+            elif (self.state == self.State.DATARECEIVE):
+                
+                self.logger.debug ("DiscoveryAppln::invoke_operation - connect to publisher and reveive data")    
+                #recevie the message
+                for pubaddr in self.pubinfos.values():
+                    received_data = self.mw_obj.receive_data (self.name,pubaddr)
+                    strs=received_data.split(':')
+                    #print data we received
+                    self.print_data(strs[0],strs[1])
+
+
+                self.logger.debug ("DiscoveryAppln::invoke_operation - date receive completed")
+    
+                # we are done. And continue to receive publishers
+                self.state = self.State.LOOKUP
+    
+                # go to event loop waiting the reply
+                return None
+
+            # elif (self.state == self.State.WAITING):
+            #     #we received some publishers to show up
+            #     self.state = self.State.LOOKUP
+            #     return 0
+
+            else:
+                raise ValueError ("Undefined state of the appln object")
+
+        except Exception as e:
+            raise e
+        
+    def dump (self):
+        ''' Pretty print '''
+
+        try:
+            self.logger.info ("**********************************")
+            self.logger.info ("DiscoveryAppln::dump")
+            self.logger.info ("THIS IS DISCOVERY :D")
+            self.logger.info ("**********************************")
+
         except Exception as e:
             raise e

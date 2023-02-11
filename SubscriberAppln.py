@@ -55,8 +55,8 @@ class SubscriberAppln():
         self.state = self.State.INITIALIZE # state that are we in
         self.name = None # our name (some unique name)
         self.topiclist = None # the different topics
-        self.iters = None   # number of iterations of publication
-        self.frequency = None # rate at which dissemination takes place
+        #self.iters = None   # number of iterations of publication
+        #self.frequency = None # rate at which dissemination takes place
         #self.num_topics = None # total num of topics we want to receive
         self.lookup = None # one of the diff ways we do lookup
         self.dissemination = None # direct or via broker
@@ -71,8 +71,8 @@ class SubscriberAppln():
             self.state = self.State.CONFIGURE
             # initialize our variables
             self.name = args.name # our name
-            self.iters = args.iters  # num of iterations
-            self.frequency = args.frequency # frequency with which topics are disseminated
+            #self.iters = args.iters  # num of iterations
+            #self.frequency = args.frequency # frequency with which topics are disseminated
             #self.num_topics = args.num_topics  # total num of topics we receive
 
             # Now, get the configuration object
@@ -232,8 +232,8 @@ class SubscriberAppln():
             self.logger.info ("     Dissemination: {}".format (self.dissemination))
             #self.logger.info ("     Num Topics: {}".format (self.num_topics))
             self.logger.info ("     TopicList: {}".format (self.topiclist))
-            self.logger.info ("     Iterations: {}".format (self.iters))
-            self.logger.info ("     Frequency: {}".format (self.frequency))
+            #self.logger.info ("     Iterations: {}".format (self.iters))
+            #self.logger.info ("     Frequency: {}".format (self.frequency))
             self.logger.info ("**********************************")
 
         except Exception as e:
@@ -278,7 +278,7 @@ def parseCmdLineArgs ():
     
     parser.add_argument ("-c", "--config", default="config.ini", help="configuration file (default: config.ini)")
     
-    parser.add_argument ("-i", "--iters", type=int, default=1000, help="number of publication iterations (default: 1000)")
+    #parser.add_argument ("-i", "--iters", type=int, default=1000, help="number of publication iterations (default: 1000)")
     
     return parser.parse_args()
 
