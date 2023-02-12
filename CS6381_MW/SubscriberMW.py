@@ -119,8 +119,6 @@ class SubscriberMW():
             disc_resp.ParseFromString (bytesRcvd)
             if (disc_resp.msg_type == discovery_pb2.TYPE_REGISTER):
                 timeout = self.upcall_obj.register_response (disc_resp.register_resp)
-            elif (disc_resp.msg_type == discovery_pb2.TYPE_ISREADY):
-                timeout = self.upcall_obj.isready_response (disc_resp.isready_resp)
             elif (disc_resp.msg_type == discovery_pb2.TYPE_LOOKUP_PUB_BY_TOPIC):
                 timeout = self.upcall_obj.lookup_response (disc_resp.lookup_resp)
             else:
@@ -172,7 +170,7 @@ class SubscriberMW():
             raise e
         
 
-    def lookup_publisher(self,name):
+    def lookup_publisher(self,name,topiclist):
         #send topic list to discovery
         #look up like register
         try:
@@ -180,6 +178,7 @@ class SubscriberMW():
             self.logger.debug ("SubscriberMW::lookup_req - populate the LookupPubByTopicReq")
             lookup_req = discovery_pb2.LookupPubByTopicReq () # allocate
             lookup_req.id = name  # our id
+            lookup_req.topiclist[:] = topiclist
             self.logger.debug ("SubscriberMW::lookup - done populating nested LookupPubByTopicReq")
 
             # Finally, build the outer layer DiscoveryReq Message

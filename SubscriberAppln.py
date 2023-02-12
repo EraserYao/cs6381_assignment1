@@ -302,7 +302,7 @@ def main ():
       logger.setLevel (args.loglevel)
       logger.debug ("Main: effective log level is {}".format (logger.getEffectiveLevel ()))
 
-      # Obtain a publisher application
+      # Obtain a subscriber application
       logger.debug ("Main: obtain the subscriber appln object")
       sub_app = SubscriberAppln (logger)
 

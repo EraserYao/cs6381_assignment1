@@ -45,18 +45,22 @@ class DiscoveryAppln():
     class State (Enum):
         INITIALIZE = 0,
         CONFIGURE = 1,
-        PUB_REGISTER=2,
-        SUB_REGISTER=3,
-        PUB_ISREADY=4,
-        SUB_LOOKUP=5
-
+        PENDING=2,
+        READY=3
 
     def __init__(self,logger):
         self.state = self.State.INITIALIZE # state that are we in
+        self.name=None
         self.pubnum=0
         self.subnum=0
+        self.cur_pubnum=0
+        self.cur_subnum=0
         self.mw_obj = None # handle to the underlying Middleware object
+        self.is_ready=False
         self.logger = logger  # internal logger for print statements
+        #temp data
+        self.pub_data={}
+        self.sub_data={}
 
     def configure(self,args):
         try:
@@ -64,6 +68,9 @@ class DiscoveryAppln():
             # set our current state to CONFIGURE state
             self.state = self.State.CONFIGURE
             # initialize our variables
+            self.name=args.name
+            self.pubnum=args.pubnum
+            self.subnum=args.subnum
 
             # Now, get the configuration object
             self.logger.debug ("DiscoveryAppln::configure - parsing config.ini")
@@ -75,7 +82,7 @@ class DiscoveryAppln():
             self.logger.debug ("DiscoveryAppln::configure - initialize the middleware object")
             self.mw_obj = DiscoveryMW (self.logger)
             self.mw_obj.configure (args) # pass remainder of the args to the m/w object
-
+            
             self.logger.info ("DiscoveryAppln::configure - configuration complete")
       
         except Exception as e:
@@ -93,7 +100,7 @@ class DiscoveryAppln():
             self.logger.debug ("DiscoveryAppln::driver - upcall handle")
             self.mw_obj.set_upcall_handle (self)
 
-            self.state = self.State.CHECKING
+            self.state = self.State.PENDING
 
             self.mw_obj.event_loop (timeout=0)  # start the event loop
 
@@ -108,50 +115,106 @@ class DiscoveryAppln():
         try:
             self.logger.info ("DiscoveryAppln::invoke_operation")
 
-            if (self.state == self.State.CHECKING):
+            if (self.state == self.State.PENDING):
                 # send a register msg to discovery service
-                self.logger.debug ("DiscoveryAppln::invoke_operation - waiting for pub and sub ")
-                self.mw_obj.register (self.name)
-
-                return None
-
-            elif (self.state == self.State.EVENTLOOP):
-
-                self.logger.debug ("DiscoveryAppln::invoke_operation - look up from discovery about publishers") 
-                self.mw_obj.lookup_publisher(self.name, self.topiclist) #send look up request
-
+                self.logger.debug ("DiscoveryAppln::invoke_operation - waiting for pub and sub to registration")
+                self.is_ready=False
+                if self.cur_pubnum==self.pubnum and self.cur_subnum==self.subnum:
+                    self.state = self.State.READY
+            
+            elif (self.state == self.State.READY):
+                self.is_ready=True
                 return None
             
-            elif (self.state == self.State.DATARECEIVE):
-                
-                self.logger.debug ("DiscoveryAppln::invoke_operation - connect to publisher and reveive data")    
-                #recevie the message
-                for pubaddr in self.pubinfos.values():
-                    received_data = self.mw_obj.receive_data (self.name,pubaddr)
-                    strs=received_data.split(':')
-                    #print data we received
-                    self.print_data(strs[0],strs[1])
-
-
-                self.logger.debug ("DiscoveryAppln::invoke_operation - date receive completed")
-    
-                # we are done. And continue to receive publishers
-                self.state = self.State.LOOKUP
-    
-                # go to event loop waiting the reply
-                return None
-
-            # elif (self.state == self.State.WAITING):
-            #     #we received some publishers to show up
-            #     self.state = self.State.LOOKUP
-            #     return 0
-
             else:
                 raise ValueError ("Undefined state of the appln object")
 
         except Exception as e:
             raise e
         
+    def register_request(self,reg_req):
+        try:
+            self.logger.info ("DiscoveryAppln::register")
+            status=discovery_pb2.STATUS_UNKNOWN
+            reason=None
+            reg_info = discovery_pb2.RegistrantInfo ()
+            reg_info.CopyFrom(reg_req.info)
+            if reg_req.role==discovery_pb2.ROLE_PUBLISHER:
+                pub_name=reg_info.id
+                if pub_name in self.pub_data.keys():
+                    status=discovery_pb2.STATUS_FAILURE
+                    reason='Name has already exits!'
+                else:
+                    self.cur_pubnum+=1
+                    status=discovery_pb2.STATUS_SUCCESS
+                    self.pub_data[pub_name]={}
+                    self.pub_data[pub_name]['addr']=reg_info.addr
+                    self.pub_data[pub_name]['port']=reg_info.port
+                    self.pub_data[pub_name]['topiclist']=reg_req.topiclist[:]
+
+            elif reg_req.role==discovery_pb2.ROLE_SUBSCRIBER:
+                sub_name=reg_info.id
+                if sub_name in self.sub_data.keys():
+                    status=discovery_pb2.STATUS_FAILURE
+                    reason='Name has already exits!'
+                else:
+                    self.cur_subnum+=1
+                    status=discovery_pb2.STATUS_SUCCESS
+                    self.sub_data[sub_name]={}
+                    self.sub_data[sub_name]['topiclist'][:]=reg_req.topiclist
+
+            elif reg_req.role==discovery_pb2.ROLE_BOTH:
+                pass
+            else:
+                raise ValueError ("Unknown type of request")
+            
+            self.mw_obj.send_register_resp(status,reason)
+            # return a timeout of zero so that the event loop in its next iteration will immediately make
+            # an upcall to us
+            return 0
+            
+        except Exception as e:
+            raise e
+
+    
+    def isready_request(self,isready_req):
+        try:
+            self.logger.info ("DiscoveryAppln::publisher is ready")
+            isready_flag=self.is_ready
+            
+            self.mw_obj.send_register_resp(isready_flag)
+            # return a timeout of zero so that the event loop in its next iteration will immediately make
+            # an upcall to us
+            return 0
+            
+        except Exception as e:
+            raise e
+
+    def lookup_request(self,lookup_req):
+        try:
+            self.logger.info ("DiscoveryAppln::subscriber lookup")
+            
+            publisherInfos=[]
+            subname=lookup_req.id
+            sub_topiclist=lookup_req.topiclist[:]
+            #get the topic
+            for pubname,publisher in self.pub_data:
+                #if topiclist in sub contains pub
+                if set(publisher['topiclist'])<set(sub_topiclist):
+                    publisherInfo=discovery_pb2.RegistrantInfo()
+                    publisherInfo.id=pubname
+                    publisherInfo.addr=publisher['addr']
+                    publisherInfo.post=publisher['port']
+                    publisherInfos.append(publisherInfo)
+
+            self.mw_obj.send_lookup_resp(publisherInfos)
+            # return a timeout of zero so that the event loop in its next iteration will immediately make
+            # an upcall to us
+            return 0
+            
+        except Exception as e:
+            raise e
+
     def dump (self):
         ''' Pretty print '''
 
@@ -163,3 +226,84 @@ class DiscoveryAppln():
 
         except Exception as e:
             raise e
+        
+###################################
+#
+# Parse command line arguments
+#
+###################################
+def parseCmdLineArgs ():
+    # instantiate a ArgumentParser object
+    parser = argparse.ArgumentParser (description="Discovery Application")
+    
+    # Now specify all the optional arguments we support
+    # At a minimum, you will need a way to specify the IP and port of the lookup
+    # service, the role we are playing, what dissemination approach are we
+    # using, what is our endpoint (i.e., port where we are going to bind at the
+    # ZMQ level)
+    
+    parser.add_argument ("-n", "--name", default="discovery", help=":D")
+
+    parser.add_argument ("-S", "--subnum", default="2", help="total number of subscribers")
+
+    parser.add_argument ("-P", "--pubnum", default="2", help="total number of publishers")
+    
+    parser.add_argument ("-a", "--addr", default="localhost", help="IP addr of this discovery to advertise (default: localhost)")
+    
+    parser.add_argument ("-p", "--port", type=int, default=5578, help="Port number on which our underlying discovery ZMQ service runs, default=5555")
+    
+    parser.add_argument ("-c", "--config", default="config.ini", help="configuration file (default: config.ini)")
+
+    
+    return parser.parse_args()
+
+###################################
+#
+# Main program
+#
+###################################
+def main ():
+    try:
+      # obtain a system wide logger and initialize it to debug level to begin with
+      logging.info ("Main - acquire a child logger and then log messages in the child")
+      logger = logging.getLogger ("DiscoveryAppln")
+
+      # first parse the arguments
+      logger.debug ("Main: parse command line arguments")
+      args = parseCmdLineArgs ()
+
+      # reset the log level to as specified
+      logger.debug ("Main: resetting log level to {}".format (args.loglevel))
+      logger.setLevel (args.loglevel)
+      logger.debug ("Main: effective log level is {}".format (logger.getEffectiveLevel ()))
+
+      # Obtain a discovery application
+      logger.debug ("Main: obtain the discovery appln object")
+      sub_app = DiscoveryAppln (logger)
+
+      # configure the object
+      logger.debug ("Main: configure the discovery appln object")
+      sub_app.configure (args)
+
+      # now invoke the driver program
+      logger.debug ("Main: invoke the discovery appln driver")
+      sub_app.driver ()
+
+    except Exception as e:
+      logger.error ("Exception caught in main - {}".format (e))
+      return
+
+    
+###################################
+#
+# Main entry point
+#
+###################################
+if __name__ == "__main__":
+
+  # set underlying default logging capabilities
+  logging.basicConfig (level=logging.DEBUG,
+                       format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
+  main ()

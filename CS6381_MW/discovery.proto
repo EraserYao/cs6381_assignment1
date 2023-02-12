@@ -88,8 +88,8 @@ message IsReadyResp
 message LookupPubByTopicReq
 {
     string id=1; //subscriber name
-    //we don't need to send topic list again
-    //repeated string topiclist = 2; // modify this appropriately
+    //we need to send topic list again
+    repeated string topiclist = 2; // modify this appropriately
 }
 
 // TO-DO
@@ -98,9 +98,10 @@ message LookupPubByTopicReq
 message LookupPubByTopicResp
 {
      // TO-DO
+    Status status = 1;   // success or failure
      // decide what fields go here. It will be a list of publishers (with their details)
     // Maybe the RegistrantInfo message can be reused.
-    repeated RegistrantInfo publisherInfos=1;
+    repeated RegistrantInfo publisherInfos=2;
 }
 
 // Finally, we are going to make a union of all these request and response messages
