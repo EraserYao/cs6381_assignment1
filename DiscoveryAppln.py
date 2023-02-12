@@ -121,6 +121,7 @@ class DiscoveryAppln():
                 self.is_ready=False
                 if self.cur_pubnum==self.pubnum and self.cur_subnum==self.subnum:
                     self.state = self.State.READY
+                return None
             
             elif (self.state == self.State.READY):
                 self.is_ready=True

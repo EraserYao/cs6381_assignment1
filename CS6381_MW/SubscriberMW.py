@@ -212,7 +212,6 @@ class SubscriberMW():
             connect_string = "tcp://" + str(pubaddr)
             self.sub.connect (connect_string)
       
-            # send the info as bytes. See how we are providing an encoding of utf-8
             bytesRcvd = self.req.recv ()
             data=str(bytesRcvd)
             self.logger.debug ("SubscriberMW::receive complete")

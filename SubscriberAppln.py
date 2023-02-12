@@ -154,8 +154,7 @@ class SubscriberAppln():
                 # we are done. And continue to receive publishers
                 self.state = self.State.LOOKUP
     
-                # go to event loop waiting the reply
-                return None
+                return 0
 
             # elif (self.state == self.State.WAITING):
             #     #we received some publishers to show up
