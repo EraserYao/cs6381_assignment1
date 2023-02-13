@@ -280,15 +280,15 @@ def main ():
 
       # Obtain a discovery application
       logger.debug ("Main: obtain the discovery appln object")
-      sub_app = DiscoveryAppln (logger)
+      disc_app = DiscoveryAppln (logger)
 
       # configure the object
       logger.debug ("Main: configure the discovery appln object")
-      sub_app.configure (args)
+      disc_app.configure (args)
 
       # now invoke the driver program
       logger.debug ("Main: invoke the discovery appln driver")
-      sub_app.driver ()
+      disc_app.driver ()
 
     except Exception as e:
       logger.error ("Exception caught in main - {}".format (e))

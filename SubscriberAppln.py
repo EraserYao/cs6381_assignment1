@@ -48,8 +48,7 @@ class SubscriberAppln():
         CONFIGURE = 1,
         REGISTER = 2,
         LOOKUP = 3,
-        DATARECEIVE = 4,
-        WAITING = 5
+        DATARECEIVE = 4
 
     def __init__(self,logger):
         self.state = self.State.INITIALIZE # state that are we in

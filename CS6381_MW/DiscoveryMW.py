@@ -175,3 +175,7 @@ class DiscoveryMW():
 
         # now go to our event loop to receive a response to this request
         self.logger.info ("DiscoveryMW::lookup response - sent response message")
+
+    def set_upcall_handle (self, upcall_obj):
+        ''' set upcall handle '''
+        self.upcall_obj = upcall_obj
