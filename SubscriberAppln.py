@@ -33,7 +33,7 @@ import argparse # for argument parsing
 import configparser # for configuration parsing
 import logging # for logging. Use it in place of print statements.
 
-
+from topic_selector import TopicSelector
 # Now import our CS6381 Middleware
 from CS6381_MW.SubscriberMW import SubscriberMW
 # We also need the message formats to handle incoming responses.
@@ -56,7 +56,7 @@ class SubscriberAppln():
         self.topiclist = None # the different topics
         #self.iters = None   # number of iterations of publication
         #self.frequency = None # rate at which dissemination takes place
-        #self.num_topics = None # total num of topics we want to receive
+        self.num_topics = None # total num of topics we want to receive
         self.lookup = None # one of the diff ways we do lookup
         self.dissemination = None # direct or via broker
         self.mw_obj = None # handle to the underlying Middleware object
@@ -72,7 +72,7 @@ class SubscriberAppln():
             self.name = args.name # our name
             #self.iters = args.iters  # num of iterations
             #self.frequency = args.frequency # frequency with which topics are disseminated
-            #self.num_topics = args.num_topics  # total num of topics we receive
+            self.num_topics = args.num_topics  # total num of topics we receive
 
             # Now, get the configuration object
             self.logger.debug ("SubscriberAppln::configure - parsing config.ini")
@@ -81,6 +81,11 @@ class SubscriberAppln():
             self.lookup = config["Discovery"]["Strategy"]
             self.dissemination = config["Dissemination"]["Strategy"]
 
+            # Now get our topic list of interest
+            self.logger.debug ("SubscriberAppln::configure - selecting our topic list")
+            ts = TopicSelector ()
+            self.topiclist = ts.interest (self.num_topics)  # let topic selector give us the desired num of topics
+    
             # Now setup up our underlying middleware object to which we delegate
             # everything
             self.logger.debug ("SubscriberAppln::configure - initialize the middleware object")
@@ -126,7 +131,7 @@ class SubscriberAppln():
             if (self.state == self.State.REGISTER):
                 # send a register msg to discovery service
                 self.logger.debug ("SubscriberAppln::invoke_operation - register with the discovery service")
-                self.mw_obj.register (self.name)
+                self.mw_obj.register (self.name,self.topiclist)
 
                 return None
 
@@ -154,11 +159,6 @@ class SubscriberAppln():
                 self.state = self.State.LOOKUP
     
                 return 0
-
-            # elif (self.state == self.State.WAITING):
-            #     #we received some publishers to show up
-            #     self.state = self.State.LOOKUP
-            #     return 0
 
             else:
                 raise ValueError ("Undefined state of the appln object")
@@ -228,7 +228,7 @@ class SubscriberAppln():
             self.logger.info ("     Name: {}".format (self.name))
             self.logger.info ("     Lookup: {}".format (self.lookup))
             self.logger.info ("     Dissemination: {}".format (self.dissemination))
-            #self.logger.info ("     Num Topics: {}".format (self.num_topics))
+            self.logger.info ("     Num Topics: {}".format (self.num_topics))
             self.logger.info ("     TopicList: {}".format (self.topiclist))
             #self.logger.info ("     Iterations: {}".format (self.iters))
             #self.logger.info ("     Frequency: {}".format (self.frequency))
@@ -270,14 +270,16 @@ def parseCmdLineArgs ():
     
     parser.add_argument ("-a", "--addr", default="localhost", help="IP addr of this subscriber to advertise (default: localhost)")
     
-    parser.add_argument ("-p", "--port", type=int, default=5578, help="Port number on which our underlying subscriber ZMQ service runs, default=5578")
+    parser.add_argument ("-p", "--port", type=int, default=5677, help="Port number on which our underlying subscriber ZMQ service runs, default=5677")
       
     parser.add_argument ("-d", "--discovery", default="localhost:5555", help="IP Addr:Port combo for the discovery service, default localhost:5555")
     
     parser.add_argument ("-c", "--config", default="config.ini", help="configuration file (default: config.ini)")
     
-    #parser.add_argument ("-i", "--iters", type=int, default=1000, help="number of publication iterations (default: 1000)")
+    parser.add_argument ("-l", "--loglevel", type=int, default=logging.INFO, choices=[logging.DEBUG,logging.INFO,logging.WARNING,logging.ERROR,logging.CRITICAL], help="logging level, choices 10,20,30,40,50: default 20=logging.INFO")
     
+    parser.add_argument ("-T", "--num_topics", type=int, choices=range(1,10), default=1, help="Number of topics to publish, currently restricted to max of 9")
+
     return parser.parse_args()
 
 ###################################

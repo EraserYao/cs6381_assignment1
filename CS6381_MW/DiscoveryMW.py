@@ -58,10 +58,10 @@ class DiscoveryMW():
             self.logger.debug ("DiscoveryMW::configure - register the REQ socket for incoming replies")
             self.poller.register (self.rep, zmq.POLLIN)
 
-            self.logger.debug ("DiscoveryMW::configure - connect to Discovery service")
+            self.logger.debug ("DiscoveryMW::configure - bind the port")
             # For our assignments we will use TCP. The connect string is made up of
             # tcp:// followed by IP addr:port number.
-            bind_str = "tcp://*" + self.port
+            bind_str = "tcp://*:" + str(self.port)
             self.rep.bind (bind_str)
 
             self.logger.info ("DiscoveryMW::configure completed")
