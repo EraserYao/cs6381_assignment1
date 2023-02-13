@@ -1,0 +1,21 @@
+2023-02-13 02:52:09,138 - root - INFO - Main - acquire a child logger and then log messages in the child
+2023-02-13 02:52:09,141 - SubscriberAppln - DEBUG - Main: parse command line arguments
+2023-02-13 02:52:09,143 - SubscriberAppln - DEBUG - Main: resetting log level to 20
+2023-02-13 02:52:09,143 - SubscriberAppln - INFO - SubscriberAppln::configure
+2023-02-13 02:52:09,144 - SubscriberAppln - INFO - SubscriberMW::configure
+2023-02-13 02:52:09,145 - SubscriberAppln - INFO - SubscriberMW::configure completed
+2023-02-13 02:52:09,146 - SubscriberAppln - INFO - SubscriberAppln::configure - configuration complete
+2023-02-13 02:52:09,146 - SubscriberAppln - INFO - SubscriberAppln::driver
+2023-02-13 02:52:09,146 - SubscriberAppln - INFO - **********************************
+2023-02-13 02:52:09,147 - SubscriberAppln - INFO - SubscriberAppln::dump
+2023-02-13 02:52:09,147 - SubscriberAppln - INFO - ------------------------------
+2023-02-13 02:52:09,147 - SubscriberAppln - INFO -      Name: sub3
+2023-02-13 02:52:09,147 - SubscriberAppln - INFO -      Lookup: Centralized
+2023-02-13 02:52:09,147 - SubscriberAppln - INFO -      Dissemination: Direct
+2023-02-13 02:52:09,148 - SubscriberAppln - INFO -      Num Topics: 1
+2023-02-13 02:52:09,148 - SubscriberAppln - INFO -      TopicList: ['weather']
+2023-02-13 02:52:09,149 - SubscriberAppln - INFO - **********************************
+2023-02-13 02:52:09,149 - SubscriberAppln - INFO - SubscriberMW::event_loop - run the event loop
+2023-02-13 02:52:09,150 - SubscriberAppln - INFO - SubscriberAppln::invoke_operation
+2023-02-13 02:52:09,150 - SubscriberAppln - INFO - SubscriberMW::register
+2023-02-13 02:52:09,151 - SubscriberAppln - INFO - SubscriberMW::register - sent register message and now now wait for reply

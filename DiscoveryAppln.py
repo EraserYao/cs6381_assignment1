@@ -61,6 +61,7 @@ class DiscoveryAppln():
         #temp data
         self.pub_data={}
         self.sub_data={}
+        self.dissemination=None
 
     def configure(self,args):
         try:
@@ -76,6 +77,7 @@ class DiscoveryAppln():
             self.logger.debug ("DiscoveryAppln::configure - parsing config.ini")
             config = configparser.ConfigParser ()
             config.read (args.config)
+            self.dissemination = config["Dissemination"]["Strategy"]
 
             # Now setup up our underlying middleware object to which we delegate
             # everything
@@ -121,9 +123,11 @@ class DiscoveryAppln():
                 self.is_ready=False
                 if self.cur_pubnum==self.pubnum and self.cur_subnum==self.subnum:
                     self.state = self.State.READY
+                    self.is_ready=True
                 return None
             
             elif (self.state == self.State.READY):
+                self.logger.debug ("DiscoveryAppln::invoke_operation - handing")
                 self.is_ready=True
                 return None
             
@@ -162,7 +166,7 @@ class DiscoveryAppln():
                     self.cur_subnum+=1
                     status=discovery_pb2.STATUS_SUCCESS
                     self.sub_data[sub_name]={}
-                    self.sub_data[sub_name]['topiclist'][:]=reg_req.topiclist
+                    self.sub_data[sub_name]['topiclist']=reg_req.topiclist[:]
 
             elif reg_req.role==discovery_pb2.ROLE_BOTH:
                 pass
@@ -181,9 +185,7 @@ class DiscoveryAppln():
     def isready_request(self,isready_req):
         try:
             self.logger.info ("DiscoveryAppln::publisher is ready")
-            isready_flag=self.is_ready
-            
-            self.mw_obj.send_register_resp(isready_flag)
+            self.mw_obj.send_isready_resp(self.is_ready)
             # return a timeout of zero so that the event loop in its next iteration will immediately make
             # an upcall to us
             return 0
@@ -196,10 +198,9 @@ class DiscoveryAppln():
             self.logger.info ("DiscoveryAppln::subscriber lookup")
             
             publisherInfos=[]
-            subname=lookup_req.id
             sub_topiclist=lookup_req.topiclist[:]
             #get the topic
-            for pubname,publisher in self.pub_data:
+            for pubname,publisher in self.pub_data.items():
                 #if topiclist in sub contains pub
                 if set(publisher['topiclist'])<set(sub_topiclist):
                     publisherInfo=discovery_pb2.RegistrantInfo()
@@ -223,6 +224,10 @@ class DiscoveryAppln():
             self.logger.info ("**********************************")
             self.logger.info ("DiscoveryAppln::dump")
             self.logger.info ("THIS IS DISCOVERY :D")
+            self.logger.info ("------------------------------")
+            self.logger.info ("     name: {}".format (self.name))
+            self.logger.info ("     Num of publisher: {}".format (self.pubnum))
+            self.logger.info ("     Num of subscriber: {}".format (self.subnum))
             self.logger.info ("**********************************")
 
         except Exception as e:

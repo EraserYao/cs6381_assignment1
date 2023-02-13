@@ -170,14 +170,13 @@ class SubscriberMW():
             raise e
         
 
-    def lookup_publisher(self,name,topiclist):
+    def lookup_publisher(self,topiclist):
         #send topic list to discovery
         #look up like register
         try:
             self.logger.info ("SubscriberMW::lookup")
             self.logger.debug ("SubscriberMW::lookup_req - populate the LookupPubByTopicReq")
             lookup_req = discovery_pb2.LookupPubByTopicReq () # allocate
-            lookup_req.id = name  # our id
             lookup_req.topiclist[:] = topiclist
             self.logger.debug ("SubscriberMW::lookup - done populating nested LookupPubByTopicReq")
 

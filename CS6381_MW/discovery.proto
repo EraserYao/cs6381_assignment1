@@ -87,9 +87,9 @@ message IsReadyResp
 // message types
 message LookupPubByTopicReq
 {
-    string id=1; //subscriber name
+    //string id=1; //subscriber name
     //we need to send topic list again
-    repeated string topiclist = 2; // modify this appropriately
+    repeated string topiclist = 1; // modify this appropriately
 }
 
 // TO-DO

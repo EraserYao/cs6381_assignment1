@@ -1,0 +1,31 @@
+2023-02-13 02:52:09,105 - root - INFO - Main - acquire a child logger and then log messages in the child
+2023-02-13 02:52:09,141 - DiscoveryAppln - DEBUG - Main: parse command line arguments
+2023-02-13 02:52:09,142 - DiscoveryAppln - DEBUG - Main: resetting log level to 10
+2023-02-13 02:52:09,142 - DiscoveryAppln - DEBUG - Main: effective log level is 10
+2023-02-13 02:52:09,142 - DiscoveryAppln - DEBUG - Main: obtain the discovery appln object
+2023-02-13 02:52:09,142 - DiscoveryAppln - DEBUG - Main: configure the discovery appln object
+2023-02-13 02:52:09,142 - DiscoveryAppln - INFO - DiscoveryAppln::configure
+2023-02-13 02:52:09,142 - DiscoveryAppln - DEBUG - DiscoveryAppln::configure - parsing config.ini
+2023-02-13 02:52:09,142 - DiscoveryAppln - DEBUG - DiscoveryAppln::configure - initialize the middleware object
+2023-02-13 02:52:09,143 - DiscoveryAppln - INFO - DiscoveryMW::configure
+2023-02-13 02:52:09,143 - DiscoveryAppln - DEBUG - DiscoveryMW::configure - obtain ZMQ context
+2023-02-13 02:52:09,143 - DiscoveryAppln - DEBUG - DiscoveryMW::configure - obtain the poller
+2023-02-13 02:52:09,143 - DiscoveryAppln - DEBUG - DiscoveryMW::configure - obtain REP sockets
+2023-02-13 02:52:09,144 - DiscoveryAppln - DEBUG - DiscoveryMW::configure - register the REQ socket for incoming replies
+2023-02-13 02:52:09,144 - DiscoveryAppln - DEBUG - DiscoveryMW::configure - bind the port
+2023-02-13 02:52:09,148 - DiscoveryAppln - INFO - DiscoveryMW::configure completed
+2023-02-13 02:52:09,148 - DiscoveryAppln - INFO - DiscoveryAppln::configure - configuration complete
+2023-02-13 02:52:09,148 - DiscoveryAppln - DEBUG - Main: invoke the discovery appln driver
+2023-02-13 02:52:09,149 - DiscoveryAppln - INFO - DiscoveryAppln::driver
+2023-02-13 02:52:09,149 - DiscoveryAppln - INFO - **********************************
+2023-02-13 02:52:09,149 - DiscoveryAppln - INFO - DiscoveryAppln::dump
+2023-02-13 02:52:09,149 - DiscoveryAppln - INFO - THIS IS DISCOVERY :D
+2023-02-13 02:52:09,150 - DiscoveryAppln - INFO - ------------------------------
+2023-02-13 02:52:09,150 - DiscoveryAppln - INFO -      name: discovery
+2023-02-13 02:52:09,150 - DiscoveryAppln - INFO -      Num of publisher: 3
+2023-02-13 02:52:09,150 - DiscoveryAppln - INFO -      Num of subscriber: 4
+2023-02-13 02:52:09,150 - DiscoveryAppln - INFO - **********************************
+2023-02-13 02:52:09,150 - DiscoveryAppln - DEBUG - DiscoveryAppln::driver - upcall handle
+2023-02-13 02:52:09,151 - DiscoveryAppln - INFO - DiscoveryMW::event_loop - run the event loop
+2023-02-13 02:52:09,151 - DiscoveryAppln - INFO - DiscoveryAppln::invoke_operation
+2023-02-13 02:52:09,151 - DiscoveryAppln - DEBUG - DiscoveryAppln::invoke_operation - waiting for pub and sub to registration

@@ -63,7 +63,6 @@ class DiscoveryMW():
             # tcp:// followed by IP addr:port number.
             bind_str = "tcp://*:" + str(self.port)
             self.rep.bind (bind_str)
-
             self.logger.info ("DiscoveryMW::configure completed")
 
         except Exception as e:
@@ -73,7 +72,7 @@ class DiscoveryMW():
         try:
             self.logger.info ("DiscoveryMW::event_loop - run the event loop")
 
-            while self.handle_events:  
+            while self.handle_events: 
                 events = dict (self.poller.poll (timeout=timeout))
                 if not events:
                     timeout = self.upcall_obj.invoke_operation ()
@@ -104,6 +103,7 @@ class DiscoveryMW():
             raise e
         
     def send_register_resp(self,status,reason):
+        self.logger.info ("DiscoveryMW::send register response")
         register_resp=discovery_pb2.RegisterResp ()
         register_resp.status=status
         if reason is not None:
@@ -129,6 +129,7 @@ class DiscoveryMW():
         self.logger.info ("DiscoveryMW::register response - sent response message")
 
     def send_isready_resp(self,is_ready):
+        self.logger.info ("DiscoveryMW::send isready response")
         isready_resp=discovery_pb2.IsReadyResp ()
         isready_resp.status=is_ready
         
@@ -153,9 +154,12 @@ class DiscoveryMW():
         self.logger.info ("DiscoveryMW::isready response - sent response message")
 
     def send_lookup_resp(self,publisherInfos):
+        self.logger.info ("DiscoveryMW::send lookup response")
         lookup_resp=discovery_pb2.LookupPubByTopicResp ()
         lookup_resp.status=discovery_pb2.STATUS_SUCCESS
-        lookup_resp.publisherInfos=publisherInfos[:]
+        for publisherInfo in publisherInfos:
+            newPublisherInfo=discovery_pb2.RegistrantInfo()
+            lookup_resp.publisherInfos.append(newPublisherInfo.CopyFrom(publisherInfo))
 
         # Finally, build the outer layer DiscoveryResp Message
         self.logger.debug ("DiscoveryMW::lookup response - build the outer DiscoveryResp message")

@@ -1,0 +1,23 @@
+2023-02-13 02:52:09,145 - root - INFO - Main - acquire a child logger and then log messages in the child
+2023-02-13 02:52:09,146 - PublisherAppln - DEBUG - Main: parse command line arguments
+2023-02-13 02:52:09,153 - PublisherAppln - DEBUG - Main: resetting log level to 20
+2023-02-13 02:52:09,153 - PublisherAppln - INFO - PublisherAppln::configure
+2023-02-13 02:52:09,154 - PublisherAppln - INFO - PublisherMW::configure
+2023-02-13 02:52:09,156 - PublisherAppln - INFO - PublisherMW::configure completed
+2023-02-13 02:52:09,156 - PublisherAppln - INFO - PublisherAppln::configure - configuration complete
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - PublisherAppln::driver
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - **********************************
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - PublisherAppln::dump
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - ------------------------------
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      Name: pub1
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      Lookup: Centralized
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      Dissemination: Direct
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      Num Topics: 5
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      TopicList: ['humidity', 'altitude', 'airquality', 'weather', 'pressure']
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      Iterations: 1000
+2023-02-13 02:52:09,157 - PublisherAppln - INFO -      Frequency: 1
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - **********************************
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - PublisherMW::event_loop - run the event loop
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - PublisherAppln::invoke_operation
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - PublisherMW::register
+2023-02-13 02:52:09,157 - PublisherAppln - INFO - PublisherMW::register - sent register message and now now wait for reply

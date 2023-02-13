@@ -138,8 +138,8 @@ class SubscriberAppln():
             elif (self.state == self.State.LOOKUP):
 
                 self.logger.debug ("SubscriberAppln::invoke_operation - look up from discovery about publishers") 
-                self.mw_obj.lookup_publisher(self.name, self.topiclist) #send look up request
-
+                self.mw_obj.lookup_publisher(self.topiclist) #send look up request
+                self.state = self.State.DATARECEIVE
                 return None
             
             elif (self.state == self.State.DATARECEIVE):
