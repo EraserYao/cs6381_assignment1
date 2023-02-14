@@ -200,7 +200,7 @@ class DiscoveryAppln():
             publisherInfos=[]
             sub_topiclist=lookup_req.topiclist[:]
             #get the topic
-            for pubname,publisher in self.pub_data.items():
+            for pubname, publisher in self.pub_data.items():
                 #if topiclist in sub contains pub
                 if set(publisher['topiclist'])<set(sub_topiclist):
                     publisherInfo=discovery_pb2.RegistrantInfo()

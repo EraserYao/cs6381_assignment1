@@ -139,7 +139,7 @@ class SubscriberAppln():
 
                 self.logger.debug ("SubscriberAppln::invoke_operation - look up from discovery about publishers") 
                 self.mw_obj.lookup_publisher(self.topiclist) #send look up request
-    
+                
                 return None
             
             elif (self.state == self.State.DATARECEIVE):
@@ -151,7 +151,7 @@ class SubscriberAppln():
                     strs=received_data.split(':')
                     #print data we received
                     self.print_data(strs[0],strs[1])
-
+                
 
                 self.logger.debug ("SubscriberAppln::invoke_operation - date receive completed")
     

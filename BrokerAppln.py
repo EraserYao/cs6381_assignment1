@@ -136,7 +136,7 @@ class BrokerAppln():
             elif (self.state == self.State.LOOKUP):
 
                 self.logger.debug ("BrokerAppln::invoke_operation - look up from discovery about publishers") 
-                self.mw_obj.lookup_publisher(self.name, self.topiclist) #send look up request
+                self.mw_obj.lookup_publisher(self.topiclist) #send look up request
 
                 return None
             
@@ -226,7 +226,7 @@ def parseCmdLineArgs ():
     
     parser.add_argument ("-a", "--addr", default="localhost", help="IP addr of this subscriber to advertise (default: localhost)")
     
-    parser.add_argument ("-p", "--port", type=int, default=5500, help="Port number on which our underlying subscriber ZMQ service runs, default=5578")
+    parser.add_argument ("-p", "--port", type=int, default=5500, help="Port number on which our underlying subscriber ZMQ service runs, default=5500")
       
     parser.add_argument ("-d", "--discovery", default="localhost:5555", help="IP Addr:Port combo for the discovery service, default localhost:5555")
     
