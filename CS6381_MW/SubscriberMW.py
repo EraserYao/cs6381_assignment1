@@ -79,6 +79,7 @@ class SubscriberMW():
 
             self.logger.debug ("SubscriberMW::configure - register the REQ socket for incoming replies")
             self.poller.register (self.req, zmq.POLLIN)
+            self.poller.register (self.sub, zmq.POLLIN)
 
             self.logger.debug ("SubscriberMW::configure - connect to Discovery service")
             # For our assignments we will use TCP. The connect string is made up of
@@ -105,6 +106,8 @@ class SubscriberMW():
                     timeout = self.upcall_obj.invoke_operation ()
                 elif self.req in events:
                     timeout = self.handle_reply ()
+                elif self.sub in events:
+                    timeout = self.receive_from_pub ()
                 else:
                     raise Exception ("Unknown event after poll")
             self.logger.info ("SubscriberMW::event_loop - out of the event loop")
@@ -153,6 +156,9 @@ class SubscriberMW():
             disc_req.msg_type = discovery_pb2.TYPE_REGISTER  # set message type
             disc_req.register_req.CopyFrom (register_req)
             self.logger.debug ("SubscriberMW::register - done building the outer message")
+
+            for item in topiclist:
+                self.sub.setsockopt(zmq.SUBSCRIBE, bytes(item, "utf-8"))
 
             # now let us stringify the buffer and print it. This is actually a sequence of bytes and not
             # a real string
@@ -203,21 +209,28 @@ class SubscriberMW():
             raise e
     
     #single publisher
-    def receive_data (self, id, pubaddr):
+    def receive_from_pub (self):
         try:
-            self.logger.debug ("SubscriberMW::receive")
-            self.logger.debug ("SubscriberMW::receive - connect to the pub socket")
-
-            connect_string = "tcp://" + str(pubaddr)
-            self.sub.connect (connect_string)
-      
-            bytesRcvd = self.req.recv ()
-            data=str(bytesRcvd)
+            self.logger.info ("SubscriberMW::receive from publisher")
+            bytesRcvd = self.sub.recv ()
+            data=str(bytesRcvd, "utf-8")
+            self.upcall_obj.data_receive(data)
             self.logger.debug ("SubscriberMW::receive complete")
-            return str(data)
+            return 0
         except Exception as e:
             raise e
             
+    def connect_pub (self, pubaddr):
+        try:
+            self.logger.info ("SubscriberMW::lookup - connect to publisher")
+            self.logger.debug ("SubscriberMW::lookup - connect to the pub socket")
+
+            connect_string = "tcp://" + str(pubaddr)
+            self.sub.connect (connect_string)
+ 
+            self.logger.debug ("SubscriberMW::connect complete")
+        except Exception as e:
+            raise e
 
     def set_upcall_handle (self, upcall_obj):
         ''' set upcall handle '''

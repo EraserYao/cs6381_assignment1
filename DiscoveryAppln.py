@@ -120,7 +120,7 @@ class DiscoveryAppln():
             if (self.state == self.State.PENDING):
                 # send a register msg to discovery service
                 self.logger.debug ("DiscoveryAppln::invoke_operation - waiting for pub and sub to registration")
-                self.is_ready=False
+                #self.is_ready=False
                 if self.cur_pubnum==self.pubnum and self.cur_subnum==self.subnum:
                     self.state = self.State.READY
                     self.is_ready=True
@@ -201,12 +201,11 @@ class DiscoveryAppln():
             sub_topiclist=lookup_req.topiclist[:]
             #get the topic
             for pubname, publisher in self.pub_data.items():
-                #if topiclist in sub contains pub
-                if set(publisher['topiclist'])<set(sub_topiclist):
+                if list(set(publisher['topiclist'])&set(sub_topiclist)):
                     publisherInfo=discovery_pb2.RegistrantInfo()
                     publisherInfo.id=pubname
                     publisherInfo.addr=publisher['addr']
-                    publisherInfo.post=publisher['port']
+                    publisherInfo.port=publisher['port']
                     publisherInfos.append(publisherInfo)
 
             self.mw_obj.send_lookup_resp(publisherInfos)
@@ -250,9 +249,9 @@ def parseCmdLineArgs ():
     
     parser.add_argument ("-n", "--name", default="discovery", help=":D")
 
-    parser.add_argument ("-S", "--subnum", default="1", help="total number of subscribers")
+    parser.add_argument ("-S", "--subnum", type=int, default="1", help="total number of subscribers")
 
-    parser.add_argument ("-P", "--pubnum", default="1", help="total number of publishers")
+    parser.add_argument ("-P", "--pubnum", type=int, default="1", help="total number of publishers")
     
     parser.add_argument ("-a", "--addr", default="localhost", help="IP addr of this discovery to advertise (default: localhost)")
     

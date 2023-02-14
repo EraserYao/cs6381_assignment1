@@ -157,9 +157,13 @@ class DiscoveryMW():
         self.logger.info ("DiscoveryMW::send lookup response")
         lookup_resp=discovery_pb2.LookupPubByTopicResp ()
         lookup_resp.status=discovery_pb2.STATUS_SUCCESS
+        
         for publisherInfo in publisherInfos:
             newPublisherInfo=discovery_pb2.RegistrantInfo()
-            lookup_resp.publisherInfos.append(newPublisherInfo.CopyFrom(publisherInfo))
+            newPublisherInfo.id=publisherInfo.id
+            newPublisherInfo.addr=publisherInfo.addr
+            newPublisherInfo.port=publisherInfo.port
+            lookup_resp.publisherInfos.append(newPublisherInfo)
 
         # Finally, build the outer layer DiscoveryResp Message
         self.logger.debug ("DiscoveryMW::lookup response - build the outer DiscoveryResp message")

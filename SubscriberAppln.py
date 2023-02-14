@@ -61,7 +61,6 @@ class SubscriberAppln():
         self.dissemination = None # direct or via broker
         self.mw_obj = None # handle to the underlying Middleware object
         self.logger = logger  # internal logger for print statements
-        self.pubinfos={} #publisher we want to connect
 
     def configure(self,args):
         try:
@@ -145,20 +144,8 @@ class SubscriberAppln():
             elif (self.state == self.State.DATARECEIVE):
                 
                 self.logger.debug ("SubscriberAppln::invoke_operation - connect to publisher and reveive data")    
-                #recevie the message
-                for pubaddr in self.pubinfos.values():
-                    received_data = self.mw_obj.receive_data (self.name,pubaddr)
-                    strs=received_data.split(':')
-                    #print data we received
-                    self.print_data(strs[0],strs[1])
-                
 
-                self.logger.debug ("SubscriberAppln::invoke_operation - date receive completed")
-    
-                # we are done. And continue to receive publishers
-                self.state = self.State.LOOKUP
-                time.sleep (10)
-                return 0
+                return None
 
             else:
                 raise ValueError ("Undefined state of the appln object")
@@ -198,8 +185,7 @@ class SubscriberAppln():
                 #return publishers which send topic to us
                 for publisherInfo in lookup_resp.publisherInfos:
                     # temporary store publishers in this structure
-                    self.pubinfos[str(publisherInfo.id)]=str(publisherInfo.addr)+':'+str(publisherInfo.port)
-
+                    self.mw_obj.connect_pub(str(publisherInfo.addr)+':'+str(publisherInfo.port))
                 #next step is to connect all these publishers
 
                 self.state = self.State.DATARECEIVE
@@ -215,6 +201,17 @@ class SubscriberAppln():
         except Exception as e:
             raise e
         
+    def data_receive(self,received_data):
+        try:
+
+            strs=received_data.split(':')
+            #print data we received
+            self.print_data(strs[0],strs[1])
+            self.state = self.State.LOOKUP
+            return 0
+        except Exception as e:
+            raise e
+    
     ########################################
     # dump the contents of the object 
     ########################################
@@ -230,8 +227,6 @@ class SubscriberAppln():
             self.logger.info ("     Dissemination: {}".format (self.dissemination))
             self.logger.info ("     Num Topics: {}".format (self.num_topics))
             self.logger.info ("     TopicList: {}".format (self.topiclist))
-            #self.logger.info ("     Iterations: {}".format (self.iters))
-            #self.logger.info ("     Frequency: {}".format (self.frequency))
             self.logger.info ("**********************************")
 
         except Exception as e:
